@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
         "/imagecapture": (context) => ImageCapturePage(),
         "/settingspage": (context) => SurveillanceConfigPage(),  // Corriger le nom de la page
       },
-      initialRoute: "/welcome_page",  // La première page affichée
+      initialRoute: "/homepage",  // La première page affichée
 
       // Apply the custom themes and system theme mode
       theme: CustomTheme.lightTheme(),
