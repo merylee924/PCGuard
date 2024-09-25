@@ -1,16 +1,5 @@
-# test_prj
+# PCGuard
+This application is designed to enhance the security of your PC by monitoring login attempts. If someone enters incorrect passwords, the system detects it as suspicious activity. The app then captures an image of the person trying to access the PC and sends it, along with their location, to the owner's mobile device through a connected mobile app.
 
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+##Screenshots
+<img width="523" alt="welcome_page" src="https://github.com/user-attachments/assets/3044ff8e-c636-4aa0-88c7-710277a56a7b">
