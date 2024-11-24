@@ -2,24 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:test_project/ui/pages/counter_page.dart';
-import 'package:test_project/ui/pages/gallery_page.dart';
+import 'package:test_project/ui/pages/display_image.dart';
 import 'package:test_project/ui/pages/home_page.dart';
 import 'package:test_project/ui/pages/image_capture_page.dart';
 import 'package:test_project/ui/pages/login_page.dart';
-import 'package:test_project/ui/pages/meteo_page.dart';
+import 'package:test_project/ui/pages/map_page.dart';
 import 'package:test_project/ui/pages/settings_page.dart';
 import 'package:test_project/ui/pages/signup_page.dart';
 import 'package:test_project/ui/pages/welcome_page.dart';
+import 'package:test_project/ui/pages/profile_user.dart';
+
 import 'firebase_options.dart';
 import 'package:test_project/ui/pages/theme.dart';
 
-// Instance globale du plugin de notifications
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialiser Supabase
   await Supabase.initialize(
     url: 'https://bdvyssupdffdzyczckgb.supabase.co',
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJkdnlzc3VwZGZmZHp5Y3pja2diIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjYxNjQwMTIsImV4cCI6MjA0MTc0MDAxMn0.GSPzzjHMNoAKyOZaw0Z2HtPezPmJ7rWSV6-lHKsnsQs',
@@ -34,25 +33,49 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      routes: {
-        "/login": (context) => LoginPage(),
-        "/welcome_page": (context) => WelcomePage(),
-        "/meteo": (context) => MeteoPage(),
-        "/gallery": (context) => GalleryPage(),
-        "/counter": (context) => CounterPage(),
-        "/homepage": (context) => HomePage(),
-        "/signup": (context) => SignUpPage(),
-        "/imagecapture": (context) => ImageCapturePage(),
-        "/settingspage": (context) => SurveillanceConfigPage(),  // Corriger le nom de la page
+      onGenerateRoute: (settings) {
+        if (settings.name == '/display') {
+          final args = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) {
+              return DisplayImageScreen(userId: args);
+            },
+          );
+        }
+        return MaterialPageRoute(
+          builder: (context) {
+            switch (settings.name) {
+              case "/login":
+                return LoginPage();
+              case "/welcome_page":
+                return WelcomePage();
+              case "/counter":
+                return CounterPage();
+              case "/homepage":
+                return HomePage();
+              case "/signup":
+                return SignUpPage();
+              case "/imagecapture":
+                return ImageCapturePage();
+              case "/settingspage":
+                return SurveillanceConfigPage();
+              case "/settingspage":
+                return SurveillanceConfigPage();
+              case "/UserProfile":
+                return UserProfileUI();
+              case "/map":
+                final args = settings.arguments as Map<String, double>;  // On attend latitude et longitude
+                return MapPage(latitude: args['latitude']!, longitude: args['longitude']!);
+              default:
+                return WelcomePage();
+            }
+          },
+        );
       },
-      initialRoute: "/homepage",  // La première page affichée
-
-      // Apply the custom themes and system theme mode
+      initialRoute: "/welcome_page",
       theme: CustomTheme.lightTheme(),
       darkTheme: CustomTheme.darkTheme(),
-      themeMode: ThemeMode.system, // Switches between light and dark based on system preferences
-
-      home: WelcomePage(),  // Mettre WelcomePage ici pour être en accord avec initialRoute
+      themeMode: ThemeMode.system,
     );
   }
 }

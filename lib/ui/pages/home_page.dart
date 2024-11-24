@@ -3,7 +3,7 @@ import 'package:test_project/ui/pages/image_capture_page.dart';
 import 'package:test_project/ui/pages/notifications_page.dart';
 import 'package:test_project/ui/pages/settings_page.dart';
 import 'package:test_project/ui/pages/theme.dart';
-import 'package:test_project/ui/pages/user_profile.dart';
+import 'package:test_project/ui/pages/profile_user.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -21,19 +21,19 @@ class _HomePageState extends State<HomePage> {
       theme: isDarkMode ? CustomTheme.darkTheme() : CustomTheme.lightTheme(),
       home: Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.transparent, // Set to transparent if needed
-          elevation: 0.0, // Remove shadow
+          backgroundColor: Colors.white, // Fond blanc
+          elevation: 0.0,
+          iconTheme: IconThemeData(color: Colors.black), // Icônes noires
           actions: [
-            // Circle avatar (profile image)
             GestureDetector(
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => UserProfilePage()),
+                  MaterialPageRoute(builder: (context) => UserProfileUI()),
                 );
               },
               child: CircleAvatar(
-                backgroundImage: AssetImage('assets/profile.jpg'), // Profile image path
+                backgroundImage: AssetImage('assets/profile.jpg'),
                 radius: 20,
               ),
             ),
@@ -42,14 +42,14 @@ class _HomePageState extends State<HomePage> {
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildDashboard(context), // Dashboard part of the page
+            _buildDashboard(context),
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
-          backgroundColor: const Color(0xFF882B56), // New color for the navigation bar
-          selectedItemColor: const Color(0xFFC8C6C2),
-          unselectedItemColor: Colors.grey[600],
+          backgroundColor: Colors.white, // Fond blanc
+          selectedItemColor: Colors.black, // Texte et icônes en noir
+          unselectedItemColor: Colors.grey,
           showSelectedLabels: true,
           showUnselectedLabels: true,
           items: const [
@@ -91,20 +91,22 @@ class _HomePageState extends State<HomePage> {
               isDarkMode = !isDarkMode;
             });
           },
-          backgroundColor: const Color(0xFF7C4A61),
-          child: Icon(isDarkMode ? Icons.wb_sunny : Icons.nightlight_round),
+          backgroundColor: Colors.black, // Adapté au thème noir et blanc
+          child: Icon(
+            isDarkMode ? Icons.wb_sunny : Icons.nightlight_round,
+            color: Colors.white, // Icône blanche sur bouton noir
+          ),
         ),
       ),
     );
   }
 
-  // Widget for the dashboard
   Widget _buildDashboard(BuildContext context) {
     return Expanded(
       flex: 3,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.white, // Fond blanc
           borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
           boxShadow: [
             BoxShadow(
@@ -120,8 +122,7 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: const [
-              SizedBox(height: 10), // Just for spacing
-              // Add other widgets if necessary
+              SizedBox(height: 10), // Ajout d'espaces si besoin
             ],
           ),
         ),
@@ -129,4 +130,3 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-

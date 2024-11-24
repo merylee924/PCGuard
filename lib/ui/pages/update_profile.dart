@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:crypto/crypto.dart'; // For password hashing
-import 'dart:convert'; // For utf8.encode
+import 'package:crypto/crypto.dart';
+import 'dart:convert';
 
 class UserProfilePage extends StatefulWidget {
   @override
@@ -14,14 +14,14 @@ class _UserProfilePageState extends State<UserProfilePage> {
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
   final passwordController = TextEditingController();
-  final supabase = Supabase.instance.client; // Get the Supabase client
+  final supabase = Supabase.instance.client;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Edit Profile"),
-        backgroundColor: Colors.black,
+        backgroundColor: Color(0xFFFFFFFF),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -39,7 +39,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     right: -10,
                     bottom: -10,
                     child: IconButton(
-                      icon: Icon(Icons.camera_alt, color: Color(0xFFCA7C5C)),
+                      icon: Icon(Icons.camera_alt, color: Color(0xFF000000)),
                       onPressed: () {
                         // Trigger image selection or camera capture
                       },
@@ -85,9 +85,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 },
                 child: Text('Edit Profile'),
                 style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.black,
-                  backgroundColor: Color(0xFFCA7C5C),
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.black,
                   minimumSize: Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
               TextButton(
@@ -167,7 +170,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     }
   }
 
-  // Utility function to build text fields with icons
+  // Utility function to build modern text fields
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -179,9 +182,20 @@ class _UserProfilePageState extends State<UserProfilePage> {
       obscureText: obscureText,
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(icon),
-        border: OutlineInputBorder(),
+        prefixIcon: Icon(icon, color: Color(0xFF000000)),
+        labelStyle: TextStyle(color: Color(0xFF000000)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Color(0xFF000000), width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Color(0xFF000000), width: 2),
+        ),
+        filled: true,
+        fillColor: Color(0xFFFFFFFF),
       ),
+      cursorColor: Color(0xFF000000),
     );
   }
 }

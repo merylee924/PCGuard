@@ -128,29 +128,34 @@ class _SurveillanceConfigPageState extends State<SurveillanceConfigPage> {
     required Widget control,
   }) {
     return Card(
-      margin: EdgeInsets.symmetric(vertical: 10),
-      elevation: 4,
+      margin: EdgeInsets.symmetric(vertical: 5), // Réduit la marge verticale
+      elevation: 3, // Diminue l'élévation
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // Réduit le padding
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(icon, size: 30, color: Theme.of(context).primaryColor),
-                SizedBox(width: 10),
-                Text(
-                  title,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                Icon(icon, size: 24, color: Theme.of(context).primaryColor),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             ),
-            SizedBox(height: 10),
-            Text(description),
-            SizedBox(height: 10),
+            SizedBox(height: 6),
+            Text(
+              description,
+              style: TextStyle(color: Colors.grey[700]),
+            ),
+            SizedBox(height: 8),
             control,
           ],
         ),
@@ -160,15 +165,16 @@ class _SurveillanceConfigPageState extends State<SurveillanceConfigPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context); // Get current theme
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
         title: Text("Surveillance Configuration"),
-        backgroundColor: theme.primaryColor, // Use theme's primary color
+        backgroundColor: theme.primaryColor,
+        foregroundColor: Colors.white,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: ListView(
@@ -183,6 +189,7 @@ class _SurveillanceConfigPageState extends State<SurveillanceConfigPage> {
                   onChanged: (value) => toggleSurveillance(),
                   title: Text(
                       "Surveillance is ${isSurveillanceEnabled ? 'enabled' : 'disabled'}"),
+                  activeColor: const Color(0xFF000000),
                 ),
               ),
               buildCard(
@@ -201,7 +208,9 @@ class _SurveillanceConfigPageState extends State<SurveillanceConfigPage> {
                       maxLoginAttempts = value.toInt();
                     });
                   },
+                  activeColor: const Color(0xFF000000), // Bleu foncé
                 ),
+
               ),
               buildCard(
                 icon: Icons.location_on,
@@ -215,6 +224,7 @@ class _SurveillanceConfigPageState extends State<SurveillanceConfigPage> {
                       isLocationEnabled = value;
                     });
                   },
+                  activeColor: const Color(0xFF000000),
                 ),
               ),
               buildCard(
@@ -233,6 +243,7 @@ class _SurveillanceConfigPageState extends State<SurveillanceConfigPage> {
                       videoDuration = value.toInt();
                     });
                   },
+                  activeColor: const Color(0xFF000000), // Bleu foncé
                 ),
               ),
               buildCard(
@@ -249,6 +260,7 @@ class _SurveillanceConfigPageState extends State<SurveillanceConfigPage> {
                           isEmailNotificationEnabled = value;
                         });
                       },
+                      activeColor: const Color(0xFF000000),
                     ),
                     if (isEmailNotificationEnabled)
                       TextFormField(
@@ -270,12 +282,18 @@ class _SurveillanceConfigPageState extends State<SurveillanceConfigPage> {
               ElevatedButton.icon(
                 onPressed: saveConfiguration,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.primary,
+                  backgroundColor: const Color(0xFF000000), // Bleu foncé
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 12.0, horizontal: 20.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
                 ),
-                icon: Icon(Icons.save, color: theme.colorScheme.onPrimary),
-                label: Text(
+                icon: const Icon(Icons.save, color: Colors.white),
+                label: const Text(
                   "Save Configuration",
-                  style: TextStyle(color: theme.colorScheme.onPrimary),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
             ],

@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:crypto/crypto.dart'; // Import for password hashing
+import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:test_project/ui/pages/theme.dart';
-import '../../components/button.dart';
-import '../../components/textfield.dart'; // Needed for UTF-8 encoding
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -15,56 +12,67 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final usernameController = TextEditingController();
+  final emailController = TextEditingController();
   final passwordController = TextEditingController();
   bool isDarkMode = false;
 
   Future<void> signUserIn() async {
-    final username = usernameController.text.trim();
+    final email = emailController.text.trim();
     final password = passwordController.text.trim();
 
-    if (username.isEmpty || password.isEmpty) {
+    if (email.isEmpty || password.isEmpty) {
       _showErrorDialog('Please enter both email and password.');
       return;
     }
 
     try {
-      // Hash the password using SHA-256
-      final hashedPassword = sha256.convert(utf8.encode(password)).toString();
-
-      // Fetch user data from Supabase
-      final userResponse = await Supabase.instance.client
-          .from('users')
-          .select('id, email, hashed_password')
-          .eq('email', username)
-          .single()
-          .execute();
-
-      final user = userResponse.data;
-
-      if (user == null) {
-        _showErrorDialog('User not found.');
-        return;
-      }
-
-      if (user['hashed_password'] != hashedPassword) {
-        _showErrorDialog('Incorrect password.');
-        return;
-      }
-
-      // Sign in with Supabase Auth
+      // Authenticate with Supabase
       final authResponse = await Supabase.instance.client.auth.signInWithPassword(
-        email: username,
-        password: password, // Use plain password for Supabase Auth
+        email: email,
+        password: password,
       );
 
-      if (authResponse.error != null) {
-        _showErrorDialog('Authentication failed: ${authResponse.error!.message}');
-      } else {
+      if (authResponse.user != null) {
+        // Connexion réussie
+        final userId = authResponse.user!.id;
+        print('User ID: $userId');
+
+        // Envoyer l'ID utilisateur au backend
+        await sendUserIdToBackend(userId);
+
+        // Rediriger vers la page d'accueil après la connexion réussie
         Navigator.of(context).pushReplacementNamed('/homepage');
+      } else {
+        // Afficher l'erreur de connexion
+        _showErrorDialog('Authentication failed: ${authResponse.error?.message ?? 'Unknown error'}');
       }
     } catch (error) {
       _showErrorDialog('Failed to sign in: $error');
+    }
+  }
+
+  Future<void> sendUserIdToBackend(String userId) async {
+    final url = Uri.parse('http://127.0.0.1:5000/api/receive-user-id'); // URL de l'API backend
+
+    final body = json.encode({
+      'user_id': userId,
+    });
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
+
+      if (response.statusCode == 200) {
+        print('User ID sent successfully to backend');
+        print('Backend response: ${response.body}');
+      } else {
+        print('Error sending ID to backend: ${response.statusCode} - ${response.body}');
+      }
+    } catch (error) {
+      print('Request error: $error');
     }
   }
 
@@ -94,10 +102,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = isDarkMode ? CustomTheme.darkTheme() : CustomTheme.lightTheme();
-
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -105,7 +110,6 @@ class _LoginPageState extends State<LoginPage> {
           IconButton(
             icon: Icon(
               isDarkMode ? Icons.wb_sunny : Icons.nights_stay,
-              color: theme.primaryColor,
             ),
             onPressed: toggleDarkMode,
           ),
@@ -122,7 +126,6 @@ class _LoginPageState extends State<LoginPage> {
                   child: Text(
                     'Login',
                     style: TextStyle(
-                      color: theme.primaryColor,
                       fontSize: 36,
                       fontWeight: FontWeight.bold,
                     ),
@@ -134,7 +137,6 @@ class _LoginPageState extends State<LoginPage> {
                   child: Text(
                     'Welcome back, you\'ve been missed!',
                     style: TextStyle(
-                      color: theme.colorScheme.secondary, // Updated from accentColor
                       fontSize: 22,
                     ),
                     textAlign: TextAlign.center,
@@ -143,77 +145,26 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 40),
                 FadeInDown(
                   delay: const Duration(milliseconds: 400),
-                  child: MyTextField(
-                    controller: usernameController,
-                    hintText: 'Email',
-                    obscureText: false,
-                    hintColor: theme.hintColor,
-                    textColor: theme.textTheme.bodyLarge?.color,
-                    fillColor: theme.inputDecorationTheme.fillColor,
+                  child: TextField(
+                    controller: emailController,
+                    decoration: const InputDecoration(hintText: 'Email'),
                   ),
                 ),
                 const SizedBox(height: 20),
                 FadeInDown(
                   delay: const Duration(milliseconds: 600),
-                  child: MyTextField(
+                  child: TextField(
                     controller: passwordController,
-                    hintText: 'Password',
+                    decoration: const InputDecoration(hintText: 'Password'),
                     obscureText: true,
-                    hintColor: theme.hintColor,
-                    textColor: theme.textTheme.bodyLarge?.color,
-                    fillColor: theme.inputDecorationTheme.fillColor,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                FadeInDown(
-                  delay: const Duration(milliseconds: 800),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {
-                        // Forgot password action
-                      },
-                      child: Text(
-                        'Forgot password?',
-                        style: TextStyle(
-                          color: theme.colorScheme.secondary, // Updated from accentColor
-                        ),
-                      ),
-                    ),
                   ),
                 ),
                 const SizedBox(height: 30),
                 FadeInDown(
                   delay: const Duration(milliseconds: 1000),
-                  child: MyButton(
-                    onTap: signUserIn,
-                    text: 'Sign In',
-                    buttonColor: theme.colorScheme.primary ?? Colors.blue, // Updated buttonColor
-                    textColor: theme.colorScheme.onPrimary ?? Colors.white, // Updated textColor
-                  ),
-                ),
-                const SizedBox(height: 50),
-                FadeInDown(
-                  delay: const Duration(milliseconds: 1200),
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pushReplacementNamed('/signup');
-                    },
-                    child: RichText(
-                      text: TextSpan(
-                        text: 'Don\'t have an account?',
-                        style: TextStyle(color: theme.colorScheme.secondary), // Updated from accentColor
-                        children: [
-                          TextSpan(
-                            text: ' Sign up',
-                            style: TextStyle(
-                              color: theme.primaryColor,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  child: ElevatedButton(
+                    onPressed: signUserIn,
+                    child: const Text('Sign In'),
                   ),
                 ),
               ],

@@ -1,55 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:crypto/crypto.dart'; // Import for password hashing
-import 'dart:convert';
+import 'package:test_project/ui/pages/theme.dart';
 
 class SignUpPage extends StatelessWidget {
   final usernameController = TextEditingController();
+  final emailController = TextEditingController();
   final passwordController = TextEditingController();
-  final firstNameController = TextEditingController(); // Nouveau champ pour le prénom
-  final lastNameController = TextEditingController(); // Nouveau champ pour le nom
-  final phoneNumberController = TextEditingController(); // Nouveau champ pour le numéro de téléphone
+  final firstNameController = TextEditingController();
+  final lastNameController = TextEditingController();
+  final phoneNumberController = TextEditingController();
 
   Future<void> signUserUp(BuildContext context) async {
-    final email = usernameController.text.trim();
+    final username = usernameController.text.trim();
+    final email = emailController.text.trim();
     final password = passwordController.text.trim();
     final firstName = firstNameController.text.trim();
     final lastName = lastNameController.text.trim();
     final phoneNumber = phoneNumberController.text.trim();
 
-    if (email.isEmpty || password.isEmpty || firstName.isEmpty || lastName.isEmpty || phoneNumber.isEmpty) {
+    if (email.isEmpty || password.isEmpty || firstName.isEmpty || lastName.isEmpty || phoneNumber.isEmpty || username.isEmpty) {
       _showCustomToast(context, 'Please fill all fields.', Colors.orange, Icons.warning);
       return;
     }
 
     try {
-      // Hash the password using SHA-256
-      final hashedPassword = sha256.convert(utf8.encode(password)).toString();
+      // Create a user with Supabase Auth
+      final authResponse = await Supabase.instance.client.auth.signUp(
+        email: email,
+        password: password,
+      );
 
-      // Store the user data in Supabase
-      final response = await Supabase.instance.client
-          .from('users')
-          .insert({
-        'first_name': firstName,
-        'last_name': lastName,
-        'email': email,
-        'phone_number': phoneNumber,
-        'hashed_password': hashedPassword,
-      })
-          .execute();
+      // Check if the user has been created successfully
+      if (authResponse.user != null) {
+        final userId = authResponse.user!.id;  // Récupérer l'UUID de l'utilisateur créé
 
-      if (response.error == null) {
-        // Show success toast
-        _showCustomToast(context, 'Account successfully created!', Colors.green, Icons.check_circle);
+        // Insert additional user information into the 'users' table
+        final response = await Supabase.instance.client
+            .from('users')
+            .insert({
+          'id': userId,  // Insérer l'UUID généré par l'authentification
+          'username': username,
+          'first_name': firstName,
+          'last_name': lastName,
+          'email': email,
+          'phone_number': phoneNumber,
+        }).execute();
 
-        // Redirect to Welcome Page after showing the toast
-        Future.delayed(const Duration(seconds: 3), () {
-          Navigator.of(context).pushReplacementNamed('/welcome_page');
-        });
+        if (response.error == null) {
+          _showCustomToast(context, 'Account successfully created!', Colors.green, Icons.check_circle);
+
+          // Redirect to the welcome page after account creation
+          Future.delayed(const Duration(seconds: 3), () {
+            Navigator.of(context).pushReplacementNamed('/welcome_page');
+          });
+        } else {
+          _showCustomToast(context, 'Failed to insert user data: ${response.error!.message}', Colors.red, Icons.error);
+        }
       } else {
-        throw response.error!.message;
+        _showCustomToast(context, 'Failed to create user in Supabase Auth.', Colors.red, Icons.error);
       }
     } catch (e) {
+      // Handle other errors
       _showCustomToast(context, 'Failed to create account: $e', Colors.red, Icons.error);
     }
   }
@@ -60,8 +71,8 @@ class SignUpPage extends StatelessWidget {
 
     entry = OverlayEntry(
       builder: (context) => Positioned(
-        top: 50, // Position en haut
-        right: 20, // Position à droite
+        top: 50,
+        right: 20,
         child: Material(
           color: Colors.transparent,
           child: Container(
@@ -110,7 +121,7 @@ class SignUpPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: CustomTheme.lightTheme().scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Create an Account'),
         backgroundColor: Colors.transparent,
@@ -121,37 +132,41 @@ class SignUpPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextField(
-              controller: firstNameController,
-              decoration: const InputDecoration(hintText: 'First Name'),
-            ),
+            _buildTextField(firstNameController, 'First Name'),
             const SizedBox(height: 20),
-            TextField(
-              controller: lastNameController,
-              decoration: const InputDecoration(hintText: 'Last Name'),
-            ),
+            _buildTextField(lastNameController, 'Last Name'),
             const SizedBox(height: 20),
-            TextField(
-              controller: usernameController,
-              decoration: const InputDecoration(hintText: 'Email'),
-            ),
+            _buildTextField(usernameController, 'Username'),
             const SizedBox(height: 20),
-            TextField(
-              controller: phoneNumberController,
-              decoration: const InputDecoration(hintText: 'Phone Number'),
-            ),
+            _buildTextField(emailController, 'Email'),
             const SizedBox(height: 20),
-            TextField(
-              controller: passwordController,
-              decoration: const InputDecoration(hintText: 'Password'),
-              obscureText: true,
-            ),
+            _buildTextField(phoneNumberController, 'Phone Number'),
+            const SizedBox(height: 20),
+            _buildTextField(passwordController, 'Password', obscureText: true),
             const SizedBox(height: 30),
             ElevatedButton(
               onPressed: () => signUserUp(context),
               child: const Text('Sign Up'),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String hintText, {bool obscureText = false}) {
+    return TextField(
+      controller: controller,
+      obscureText: obscureText,
+      style: TextStyle(color: CustomTheme.lightTheme().textTheme.bodyMedium?.color),
+      decoration: InputDecoration(
+        hintText: hintText,
+        hintStyle: TextStyle(color: CustomTheme.lightTheme().hintColor),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: CustomTheme.lightTheme().dividerColor!),
         ),
       ),
     );
